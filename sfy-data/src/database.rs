@@ -1,14 +1,12 @@
 use eyre::Result;
 use serde::{Deserialize, Serialize};
-use sqlx::sqlite::{
-    SqliteConnectOptions, SqliteJournalMode, SqlitePool, SqlitePoolOptions, SqliteSynchronous,
-};
+use sqlx::AnyPool;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 #[derive(Debug)]
 pub struct Database {
-    db: SqlitePool,
+    db: AnyPool,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -81,20 +79,10 @@ impl Into<String> for OmbMessageType {
 }
 
 impl Database {
-    pub async fn open(path: impl AsRef<Path>) -> Result<Database> {
-        let path: PathBuf = path.as_ref().into();
+    pub async fn open(path: &str) -> Result<Database> {
         info!("opening database at: {:?}", path);
 
-        let db = SqliteConnectOptions::from_str(&format!("sqlite:{}", path.to_string_lossy()))?
-            .create_if_missing(true)
-            .journal_mode(SqliteJournalMode::Wal)
-            .synchronous(SqliteSynchronous::Normal)
-            .shared_cache(true)
-            .page_size(10 * 1024)
-            .pragma("cache_size", "-20000") // multiple of page_size
-            .pragma("mmap_size", "3000000000")
-            .pragma("temp_store", "memory");
-        let db = SqlitePoolOptions::new().connect_with(db).await?;
+        let db = AnyPool::connect(path).await?;
 
         info!("running db migrations..");
         sqlx::migrate!("./migrations").run(&db).await?;
@@ -163,7 +151,7 @@ impl Database {
     pub async fn temporary() -> Database {
         warn!("create temporary database at in memory");
 
-        Database::open(":memory:").await.unwrap()
+        Database::open("sqlite::memory:").await.unwrap()
     }
 }
 
@@ -174,7 +162,7 @@ pub struct Buoy {
     known: bool,
     name: Option<String>,
     buoy_type: BuoyType,
-    db: SqlitePool,
+    db: AnyPool,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
