@@ -1,11 +1,17 @@
 {
-  "db": "SQLite",
+  "db": "PostgreSQL",
   "359882be70941a50bd0d5a8261e29e19240f7fddc01a175ad686935064670c72": {
     "describe": {
       "columns": [],
       "nullable": [],
       "parameters": {
-        "Right": 5
+        "Left": [
+          "Text",
+          "Int8",
+          "Text",
+          "Text",
+          "Bytea"
+        ]
       }
     },
     "query": "INSERT INTO events (dev, received, event, message_type, data) VALUES ( $1, $2, $3, $4, $5 )"
@@ -16,12 +22,12 @@
         {
           "name": "received",
           "ordinal": 0,
-          "type_info": "Int64"
+          "type_info": "Int8"
         },
         {
           "name": "event",
           "ordinal": 1,
-          "type_info": "Int64"
+          "type_info": "Int4"
         },
         {
           "name": "message_type",
@@ -35,7 +41,9 @@
         false
       ],
       "parameters": {
-        "Right": 1
+        "Left": [
+          "Text"
+        ]
       }
     },
     "query": "SELECT received, event, message_type FROM omb_events where dev = $1 ORDER BY received"
@@ -45,7 +53,10 @@
       "columns": [],
       "nullable": [],
       "parameters": {
-        "Right": 2
+        "Left": [
+          "Text",
+          "Text"
+        ]
       }
     },
     "query": "INSERT INTO buoys (dev, name, buoy_type) VALUES ( $1, $2, 'sfy' )"
@@ -56,14 +67,16 @@
         {
           "name": "data",
           "ordinal": 0,
-          "type_info": "Blob"
+          "type_info": "Bytea"
         }
       ],
       "nullable": [
         true
       ],
       "parameters": {
-        "Right": 1
+        "Left": [
+          "Text"
+        ]
       }
     },
     "query": "SELECT data FROM events WHERE dev = $1 AND (message_type = 'axl.qo' or message_type = '_track.qo') ORDER BY received DESC LIMIT 1"
@@ -73,7 +86,9 @@
       "columns": [],
       "nullable": [],
       "parameters": {
-        "Right": 1
+        "Left": [
+          "Text"
+        ]
       }
     },
     "query": "INSERT INTO buoys (dev, buoy_type) VALUES ( $1, 'omb' )"
@@ -84,7 +99,7 @@
         {
           "name": "event",
           "ordinal": 0,
-          "type_info": "Int64"
+          "type_info": "Int4"
         },
         {
           "name": "message_type",
@@ -94,12 +109,12 @@
         {
           "name": "received",
           "ordinal": 2,
-          "type_info": "Int64"
+          "type_info": "Int8"
         },
         {
           "name": "data",
           "ordinal": 3,
-          "type_info": "Blob"
+          "type_info": "Bytea"
         }
       ],
       "nullable": [
@@ -109,7 +124,11 @@
         true
       ],
       "parameters": {
-        "Right": 3
+        "Left": [
+          "Text",
+          "Int8",
+          "Int8"
+        ]
       }
     },
     "query": "SELECT event, message_type, received, data FROM omb_events WHERE dev = $1 AND received >= $2 AND received <= $3 ORDER BY received"
@@ -120,7 +139,7 @@
         {
           "name": "received",
           "ordinal": 0,
-          "type_info": "Int64"
+          "type_info": "Int8"
         },
         {
           "name": "event",
@@ -139,7 +158,9 @@
         false
       ],
       "parameters": {
-        "Right": 1
+        "Left": [
+          "Text"
+        ]
       }
     },
     "query": "SELECT received, event, message_type FROM events where dev = $1 ORDER BY received"
@@ -155,12 +176,12 @@
         {
           "name": "received",
           "ordinal": 1,
-          "type_info": "Int64"
+          "type_info": "Int8"
         },
         {
           "name": "data",
           "ordinal": 2,
-          "type_info": "Blob"
+          "type_info": "Bytea"
         }
       ],
       "nullable": [
@@ -169,7 +190,11 @@
         true
       ],
       "parameters": {
-        "Right": 3
+        "Left": [
+          "Text",
+          "Int8",
+          "Int8"
+        ]
       }
     },
     "query": "SELECT event, received, data FROM events WHERE dev = $1 AND received >= $2 AND received <= $3 ORDER BY received"
@@ -179,7 +204,13 @@
       "columns": [],
       "nullable": [],
       "parameters": {
-        "Right": 5
+        "Left": [
+          "Text",
+          "Int8",
+          "Text",
+          "Text",
+          "Bytea"
+        ]
       }
     },
     "query": "INSERT INTO omb_events (dev, received, account, message_type, data) VALUES ( $1, $2, $3, $4, $5 )"
@@ -209,7 +240,9 @@
         false
       ],
       "parameters": {
-        "Right": 1
+        "Left": [
+          "Text"
+        ]
       }
     },
     "query": "SELECT dev, name, buoy_type FROM buoys where dev = $1"
@@ -225,7 +258,7 @@
         {
           "name": "received",
           "ordinal": 1,
-          "type_info": "Int64"
+          "type_info": "Int8"
         },
         {
           "name": "message_type",
@@ -239,7 +272,11 @@
         false
       ],
       "parameters": {
-        "Right": 3
+        "Left": [
+          "Text",
+          "Int8",
+          "Int8"
+        ]
       }
     },
     "query": "SELECT event, received, message_type FROM events WHERE dev = $1 AND received >= $2 AND received <= $3 ORDER BY received"
@@ -250,14 +287,18 @@
         {
           "name": "data",
           "ordinal": 0,
-          "type_info": "Blob"
+          "type_info": "Bytea"
         }
       ],
       "nullable": [
         true
       ],
       "parameters": {
-        "Right": 3
+        "Left": [
+          "Text",
+          "Int8",
+          "Text"
+        ]
       }
     },
     "query": "SELECT data FROM events WHERE dev = $1 AND received = $2 AND event = $3"
@@ -268,14 +309,19 @@
         {
           "name": "data",
           "ordinal": 0,
-          "type_info": "Blob"
+          "type_info": "Bytea"
         }
       ],
       "nullable": [
         true
       ],
       "parameters": {
-        "Right": 4
+        "Left": [
+          "Text",
+          "Int8",
+          "Int4",
+          "Text"
+        ]
       }
     },
     "query": "SELECT data FROM omb_events WHERE dev = $1 AND received = $2 AND event = $3 AND message_type = $4"
@@ -285,7 +331,10 @@
       "columns": [],
       "nullable": [],
       "parameters": {
-        "Right": 2
+        "Left": [
+          "Text",
+          "Text"
+        ]
       }
     },
     "query": "UPDATE buoys SET name = $1 where dev = $2"
@@ -315,7 +364,7 @@
         false
       ],
       "parameters": {
-        "Right": 0
+        "Left": []
       }
     },
     "query": "SELECT dev, name, buoy_type FROM buoys ORDER BY dev"
@@ -326,7 +375,7 @@
         {
           "name": "event",
           "ordinal": 0,
-          "type_info": "Int64"
+          "type_info": "Int4"
         },
         {
           "name": "message_type",
@@ -336,7 +385,7 @@
         {
           "name": "received",
           "ordinal": 2,
-          "type_info": "Int64"
+          "type_info": "Int8"
         }
       ],
       "nullable": [
@@ -345,7 +394,11 @@
         false
       ],
       "parameters": {
-        "Right": 3
+        "Left": [
+          "Text",
+          "Int8",
+          "Int8"
+        ]
       }
     },
     "query": "SELECT event, message_type, received FROM omb_events WHERE dev = $1 AND received >= $2 AND received <= $3 ORDER BY received"
@@ -356,14 +409,16 @@
         {
           "name": "data",
           "ordinal": 0,
-          "type_info": "Blob"
+          "type_info": "Bytea"
         }
       ],
       "nullable": [
         true
       ],
       "parameters": {
-        "Right": 1
+        "Left": [
+          "Text"
+        ]
       }
     },
     "query": "SELECT data FROM omb_events WHERE dev = $1 AND message_type = 'gps' ORDER BY received DESC LIMIT 1"
