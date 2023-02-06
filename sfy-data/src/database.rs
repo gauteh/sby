@@ -1,12 +1,19 @@
 use eyre::Result;
 use serde::{Deserialize, Serialize};
-use sqlx::AnyPool;
-use std::path::{Path, PathBuf};
-use std::str::FromStr;
+use std::path::Path;
+
+#[cfg(feature = "sqlite")]
+use sqlx::sqlite::{
+    SqliteConnectOptions, SqliteJournalMode, SqlitePool as Pool, SqlitePoolOptions,
+    SqliteSynchronous,
+};
+
+#[cfg(feature = "postgres")]
+use sqlx::PgPool as Pool;
 
 #[derive(Debug)]
 pub struct Database {
-    db: AnyPool,
+    db: Pool,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -82,10 +89,33 @@ impl Database {
     pub async fn open(path: &str) -> Result<Database> {
         info!("opening database at: {:?}", path);
 
-        let db = AnyPool::connect(path).await?;
+        #[cfg(feature = "postgres")]
+        let db = {
+            let db = Pool::connect(path).await?;
+            db
+        };
+
+        #[cfg(feature = "sqlite")]
+        let db = {
+            use std::str::FromStr;
+            let db = SqliteConnectOptions::from_str(path)?
+                .create_if_missing(true)
+                .journal_mode(SqliteJournalMode::Wal)
+                .synchronous(SqliteSynchronous::Normal)
+                .shared_cache(true)
+                .page_size(10 * 1024)
+                .pragma("cache_size", "-20000") // multiple of page_size
+                .pragma("mmap_size", "3000000000")
+                .pragma("temp_store", "memory");
+            SqlitePoolOptions::new().connect_with(db).await?
+        };
 
         info!("running db migrations..");
-        sqlx::migrate!("./migrations").run(&db).await?;
+        #[cfg(feature = "sqlite")]
+        sqlx::migrate!("./migrations/sqlite").run(&db).await?;
+
+        #[cfg(feature = "postgres")]
+        sqlx::migrate!("./migrations/postgres").run(&db).await?;
 
         Ok(Database { db })
     }
@@ -95,7 +125,7 @@ impl Database {
         let dev = percent_encoding::percent_decode_str(dev)
             .decode_utf8_lossy()
             .to_string();
-        let buoy = sqlx::query!("SELECT dev, name, buoy_type FROM buoys where dev = ?1", dev)
+        let buoy = sqlx::query!("SELECT dev, name, buoy_type FROM buoys where dev = $1", dev)
             .fetch_optional(&self.db)
             .await?;
 
@@ -132,7 +162,8 @@ impl Database {
                     r.name.clone().unwrap_or(String::new()),
                     r.buoy_type.clone(),
                 )
-            }).collect();
+            })
+            .collect();
 
         let mut last = Vec::new();
 
@@ -142,16 +173,24 @@ impl Database {
             last.push(e);
         }
 
-        let buoys = buoys.into_iter().zip(last).map(|(b, l)| (b.0, b.1, b.2, l)).collect();
+        let buoys = buoys
+            .into_iter()
+            .zip(last)
+            .map(|(b, l)| (b.0, b.1, b.2, l))
+            .collect();
 
         Ok(buoys)
     }
 
     #[cfg(test)]
     pub async fn temporary() -> Database {
-        warn!("create temporary database at in memory");
+        #[cfg(feature = "sqlite")]
+        return Database::open("sqlite::memory:").await.unwrap();
 
-        Database::open("sqlite::memory:").await.unwrap()
+        #[cfg(feature = "postgres")]
+        return Database::open("postgres://postgres:sfytest@localhost/postgres")
+            .await
+            .unwrap();
     }
 }
 
@@ -162,7 +201,7 @@ pub struct Buoy {
     known: bool,
     name: Option<String>,
     buoy_type: BuoyType,
-    db: AnyPool,
+    db: Pool,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -190,7 +229,9 @@ impl Buoy {
         if let Some(ref name) = name {
             if self.name.as_ref() != Some(&name) {
                 debug!("Updating name for: {} to {}", self.dev, name);
-                self.known = false;
+                sqlx::query!("UPDATE buoys SET name = $1 where dev = $2", name, self.dev,)
+                    .execute(&self.db)
+                    .await?;
             }
         }
 
@@ -201,7 +242,7 @@ impl Buoy {
             );
 
             sqlx::query!(
-                "INSERT OR REPLACE INTO buoys (dev, name, buoy_type) VALUES ( ?1, ?2, 'sfy' )",
+                "INSERT INTO buoys (dev, name, buoy_type) VALUES ( $1, $2, 'sfy' )",
                 self.dev,
                 name
             )
@@ -223,7 +264,7 @@ impl Buoy {
         let r = received as i64;
         let file = file.unwrap_or_else(|| "unknown".into());
         sqlx::query!(
-            "INSERT INTO events (dev, received, event, message_type, data) VALUES ( ?1, ?2, ?3, ?4, ?5 )",
+            "INSERT INTO events (dev, received, event, message_type, data) VALUES ( $1, $2, $3, $4, $5 )",
             self.dev,
             r,
             event,
@@ -250,7 +291,7 @@ impl Buoy {
 
         if !self.known {
             sqlx::query!(
-                "INSERT OR REPLACE INTO buoys (dev, buoy_type) VALUES ( ?1, 'omb' )",
+                "INSERT INTO buoys (dev, buoy_type) VALUES ( $1, 'omb' )",
                 self.dev,
             )
             .execute(&self.db)
@@ -271,7 +312,7 @@ impl Buoy {
         let message_type = message_type.to_str();
         let r = received as i64;
         sqlx::query!(
-            "INSERT INTO omb_events (dev, received, account, message_type, data) VALUES ( ?1, ?2, ?3, ?4, ?5 )",
+            "INSERT INTO omb_events (dev, received, account, message_type, data) VALUES ( $1, $2, $3, $4, $5 )",
             self.dev,
             r,
             account,
@@ -290,7 +331,7 @@ impl Buoy {
         let events = match self.buoy_type {
             BuoyType::SFY => {
                 sqlx::query!(
-                    "SELECT received, event, message_type FROM events where dev = ?1 ORDER BY received",
+                    "SELECT received, event, message_type FROM events where dev = $1 ORDER BY received",
                     self.dev
                 )
                 .map(|r| (format!("{}-{}", r.received, r.event), r.message_type))
@@ -299,7 +340,7 @@ impl Buoy {
             }
             BuoyType::OMB => {
                 sqlx::query!(
-                    "SELECT received, event, message_type FROM omb_events where dev = ?1 ORDER BY received",
+                    "SELECT received, event, message_type FROM omb_events where dev = $1 ORDER BY received",
                     self.dev
                 )
                 .map(|r| (format!("{}-{}-{}", r.received, r.event, r.message_type), r.message_type))
@@ -317,11 +358,11 @@ impl Buoy {
         ensure!(self.known, "No such buoy");
 
         let data = match self.buoy_type {
-            BuoyType::SFY => sqlx::query!("SELECT data FROM events WHERE dev = ?1 AND (message_type = 'axl.qo' or message_type = '_track.qo') ORDER BY received DESC LIMIT 1", self.dev)
+            BuoyType::SFY => sqlx::query!("SELECT data FROM events WHERE dev = $1 AND (message_type = 'axl.qo' or message_type = '_track.qo') ORDER BY received DESC LIMIT 1", self.dev)
                 .fetch_one(&self.db)
                 .await?.data,
 
-            BuoyType::OMB => sqlx::query!("SELECT data FROM omb_events WHERE dev = ?1 AND message_type = 'gps' ORDER BY received DESC LIMIT 1", self.dev)
+            BuoyType::OMB => sqlx::query!("SELECT data FROM omb_events WHERE dev = $1 AND message_type = 'gps' ORDER BY received DESC LIMIT 1", self.dev)
                 .fetch_one(&self.db)
                 .await?.data,
 
@@ -345,8 +386,10 @@ impl Buoy {
                     .split_once('-')
                     .ok_or(eyre!("incorrect format of event"))?;
 
+                let received = received.parse::<i64>()?;
+
                 sqlx::query!(
-                    "SELECT data FROM events WHERE dev = ?1 AND received = ?2 AND event = ?3",
+                    "SELECT data FROM events WHERE dev = $1 AND received = $2 AND event = $3",
                     self.dev,
                     received,
                     file
@@ -360,10 +403,12 @@ impl Buoy {
                 ensure!(parts.len() == 3, "incorrect format of event");
                 let received = parts[0];
                 let file = parts[1];
+                let file = file.parse::<i32>()?;
                 let message_type = parts[2];
+                let received = received.parse::<i64>()?;
 
                 sqlx::query!(
-                    "SELECT data FROM omb_events WHERE dev = ?1 AND received = ?2 AND event = ?3 AND message_type = ?4",
+                    "SELECT data FROM omb_events WHERE dev = $1 AND received = $2 AND event = $3 AND message_type = $4",
                     self.dev,
                     received,
                     file,
@@ -387,7 +432,7 @@ impl Buoy {
         let events = match self.buoy_type {
             BuoyType::SFY => {
                 sqlx::query!(
-                    "SELECT event, received, message_type FROM events WHERE dev = ?1 AND received >= ?2 AND received <= ?3 ORDER BY received",
+                    "SELECT event, received, message_type FROM events WHERE dev = $1 AND received >= $2 AND received <= $3 ORDER BY received",
                     self.dev,
                     start,
                     end,
@@ -398,7 +443,7 @@ impl Buoy {
             },
             BuoyType::OMB => {
                 sqlx::query!(
-                    "SELECT event, message_type, received FROM omb_events WHERE dev = ?1 AND received >= ?2 AND received <= ?3 ORDER BY received",
+                    "SELECT event, message_type, received FROM omb_events WHERE dev = $1 AND received >= $2 AND received <= $3 ORDER BY received",
                     self.dev,
                     start,
                     end,
@@ -420,7 +465,7 @@ impl Buoy {
             BuoyType::SFY => {
                 sqlx::query_as!(
                     Event,
-                    "SELECT event, received, data FROM events WHERE dev = ?1 AND received >= ?2 AND received <= ?3 ORDER BY received",
+                    "SELECT event, received, data FROM events WHERE dev = $1 AND received >= $2 AND received <= $3 ORDER BY received",
                     self.dev,
                     start,
                     end,
@@ -430,7 +475,7 @@ impl Buoy {
             },
             BuoyType::OMB => {
                 sqlx::query!(
-                    "SELECT event, message_type, received, data FROM omb_events WHERE dev = ?1 AND received >= ?2 AND received <= ?3 ORDER BY received",
+                    "SELECT event, message_type, received, data FROM omb_events WHERE dev = $1 AND received >= $2 AND received <= $3 ORDER BY received",
                     self.dev,
                     start,
                     end,
@@ -464,7 +509,7 @@ mod tests {
     #[tokio::test]
     async fn add_some_entries() {
         let db = Database::temporary().await;
-        let mut b = db.buoy("buoy-01").await.unwrap();
+        let mut b = db.buoy("buoy-05").await.unwrap();
 
         b.append(None, "entry-0", 0, None, "data-0").await.unwrap();
         b.append(None, "entry-1", 0, None, "data-1").await.unwrap();
@@ -485,35 +530,39 @@ mod tests {
     async fn list_buoys() {
         let db = Database::temporary().await;
 
-        let mut b = db.buoy("buoy-01").await.unwrap();
+        let mut b = db.buoy("buoy-07").await.unwrap();
         b.append(None, "entry-0", 0, None, "data-0").await.unwrap();
 
-        let mut b = db.buoy("buoy-02").await.unwrap();
+        let mut b = db.buoy("buoy-08").await.unwrap();
         b.append(None, "entry-1", 0, None, "data-1").await.unwrap();
 
         let devs = db.buoys().await.unwrap();
         let devs: Vec<_> = devs.iter().map(|(dev, _, _, _)| dev).collect();
 
-        assert_eq!(devs, ["buoy-01", "buoy-02"]);
+        assert!(devs.iter().any(|e| *e == "buoy-07"));
+        assert!(devs.iter().any(|e| *e == "buoy-08"));
     }
 
     #[tokio::test]
     async fn list_entries() {
         let db = Database::temporary().await;
-        let mut b = db.buoy("buoy-01").await.unwrap();
+        let mut b = db.buoy("buoy-04").await.unwrap();
         b.append(None, "entry-0", 0, None, "data-0").await.unwrap();
         b.append(None, "entry-1", 0, None, "data-1").await.unwrap();
 
         assert_eq!(
-            db.buoy("buoy-01").await.unwrap().entries().await.unwrap(),
-            [("0-entry-0".into(), "unknown".into()), ("0-entry-1".into(), "unknown".into())]
+            db.buoy("buoy-04").await.unwrap().entries().await.unwrap(),
+            [
+                ("0-entry-0".into(), "unknown".into()),
+                ("0-entry-1".into(), "unknown".into())
+            ]
         );
     }
 
     #[tokio::test]
     async fn append_get() {
         let db = Database::temporary().await;
-        let mut b = db.buoy("buoy-01").await.unwrap();
+        let mut b = db.buoy("buoy-02").await.unwrap();
         b.append(None, "entry-0", 0, None, "data-0").await.unwrap();
 
         assert_eq!(b.get("0-entry-0").await.unwrap(), b"data-0");
@@ -522,7 +571,7 @@ mod tests {
     #[tokio::test]
     async fn append_get_range() {
         let db = Database::temporary().await;
-        let mut b = db.buoy("buoy-01").await.unwrap();
+        let mut b = db.buoy("buoy-03").await.unwrap();
         b.append(None, "entry-0", 0, None, "data-0").await.unwrap();
         b.append(None, "entry-1", 1, None, "data-1").await.unwrap();
         b.append(None, "entry-2", 2, None, "data-2").await.unwrap();
@@ -577,7 +626,9 @@ mod tests {
     async fn append_last() {
         let db = Database::temporary().await;
         let mut b = db.buoy("buoy-01").await.unwrap();
-        b.append(None, "entry-0-axl.qo", 0, Some("axl.qo".into()), "data-0").await.unwrap();
+        b.append(None, "entry-0-axl.qo", 0, Some("axl.qo".into()), "data-0")
+            .await
+            .unwrap();
         b.append(None, "entry-1-sessi.qo", 0, None, "data-1")
             .await
             .unwrap();

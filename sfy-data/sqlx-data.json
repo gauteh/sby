@@ -1,16 +1,6 @@
 {
   "db": "SQLite",
-  "09d56aab3e5e4e95222fdcd2d9581657cb147f14ccaf602de325f4e80039f6b8": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Right": 2
-      }
-    },
-    "query": "INSERT OR REPLACE INTO buoys (dev, name, buoy_type) VALUES ( ?1, ?2, 'sfy' )"
-  },
-  "0cff5ef55d049de1fa0b206f36b149f8b4afb8dde8a1f8d9a5550e62ec33d832": {
+  "359882be70941a50bd0d5a8261e29e19240f7fddc01a175ad686935064670c72": {
     "describe": {
       "columns": [],
       "nullable": [],
@@ -18,9 +8,9 @@
         "Right": 5
       }
     },
-    "query": "INSERT INTO events (dev, received, event, message_type, data) VALUES ( ?1, ?2, ?3, ?4, ?5 )"
+    "query": "INSERT INTO events (dev, received, event, message_type, data) VALUES ( $1, $2, $3, $4, $5 )"
   },
-  "29827c4bb027d29f7fd1697f498c2c6a2be91a159467c79e7ac777318f39f9f3": {
+  "39802a0b786ef9c6805114721f945e8ffeb803f01b59c21819de20d4c2b312d2": {
     "describe": {
       "columns": [
         {
@@ -48,39 +38,19 @@
         "Right": 1
       }
     },
-    "query": "SELECT received, event, message_type FROM omb_events where dev = ?1 ORDER BY received"
+    "query": "SELECT received, event, message_type FROM omb_events where dev = $1 ORDER BY received"
   },
-  "512252eeb9063833d58b0106cf65920fa2074a8ce4ff71fce361cb2c3e5291a9": {
+  "3aaf2ff16d0f2f7d166876087f9549c0559a61e3a877a0dd9b75246884f4ab15": {
     "describe": {
-      "columns": [
-        {
-          "name": "event",
-          "ordinal": 0,
-          "type_info": "Text"
-        },
-        {
-          "name": "received",
-          "ordinal": 1,
-          "type_info": "Int64"
-        },
-        {
-          "name": "message_type",
-          "ordinal": 2,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
+      "columns": [],
+      "nullable": [],
       "parameters": {
-        "Right": 3
+        "Right": 2
       }
     },
-    "query": "SELECT event, received, message_type FROM events WHERE dev = ?1 AND received >= ?2 AND received <= ?3 ORDER BY received"
+    "query": "INSERT INTO buoys (dev, name, buoy_type) VALUES ( $1, $2, 'sfy' )"
   },
-  "5681f98a3810297bd33c0aa8067ffcb98fb9b71679c7ad2f1da489a1b846a073": {
+  "4ddd4192872c4e3ee4590aac364999318875076fd44565de897985fa772709ec": {
     "describe": {
       "columns": [
         {
@@ -93,42 +63,12 @@
         true
       ],
       "parameters": {
-        "Right": 4
-      }
-    },
-    "query": "SELECT data FROM omb_events WHERE dev = ?1 AND received = ?2 AND event = ?3 AND message_type = ?4"
-  },
-  "630299a0d4be768c469d4fa54940c348656a04b7f90f23abc503e7bb3e6377f0": {
-    "describe": {
-      "columns": [
-        {
-          "name": "received",
-          "ordinal": 0,
-          "type_info": "Int64"
-        },
-        {
-          "name": "event",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "message_type",
-          "ordinal": 2,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
-      "parameters": {
         "Right": 1
       }
     },
-    "query": "SELECT received, event, message_type FROM events where dev = ?1 ORDER BY received"
+    "query": "SELECT data FROM events WHERE dev = $1 AND (message_type = 'axl.qo' or message_type = '_track.qo') ORDER BY received DESC LIMIT 1"
   },
-  "75bcaae3f860aeb6ae1c2403fa4117ddd7dfc18b8bbc3443d5a3c984c6969361": {
+  "56a02a9531fb72e86792cd1f9619eab1350a56ae999fc13b773e40c6e7100353": {
     "describe": {
       "columns": [],
       "nullable": [],
@@ -136,9 +76,9 @@
         "Right": 1
       }
     },
-    "query": "INSERT OR REPLACE INTO buoys (dev, buoy_type) VALUES ( ?1, 'omb' )"
+    "query": "INSERT INTO buoys (dev, buoy_type) VALUES ( $1, 'omb' )"
   },
-  "798a551876e4ecef0d8ba6a3a2a52e8309a37b5271c3f4e0445a45cc9575918c": {
+  "74f91a9754d2d31e664d402cf59d805f4c06324a2248f4fa1d8c97b8fa20d728": {
     "describe": {
       "columns": [
         {
@@ -172,9 +112,39 @@
         "Right": 3
       }
     },
-    "query": "SELECT event, message_type, received, data FROM omb_events WHERE dev = ?1 AND received >= ?2 AND received <= ?3 ORDER BY received"
+    "query": "SELECT event, message_type, received, data FROM omb_events WHERE dev = $1 AND received >= $2 AND received <= $3 ORDER BY received"
   },
-  "9264349646da070d063ffd2dc8021871a92dd0e0350bbcb98f41f45b7e1f1350": {
+  "95c29e69ed26e624fe32f63c08622636770490f5fd8ff9164f90e4c7c22aef09": {
+    "describe": {
+      "columns": [
+        {
+          "name": "received",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "event",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "message_type",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT received, event, message_type FROM events where dev = $1 ORDER BY received"
+  },
+  "a11ac152b4f74ccc7f8b8b4562d1daea623347b9e947e850cb87dcbe60ab7c41": {
     "describe": {
       "columns": [
         {
@@ -202,27 +172,19 @@
         "Right": 3
       }
     },
-    "query": "SELECT event, received, data FROM events WHERE dev = ?1 AND received >= ?2 AND received <= ?3 ORDER BY received"
+    "query": "SELECT event, received, data FROM events WHERE dev = $1 AND received >= $2 AND received <= $3 ORDER BY received"
   },
-  "a5795363da9c8a2d95aaf58735c7ff40b321cc47c50655136b48020c349b3019": {
+  "b3b14eea64aacf59fe45fe2f50d7313af69401648c268e1508a21db4e950a460": {
     "describe": {
-      "columns": [
-        {
-          "name": "data",
-          "ordinal": 0,
-          "type_info": "Blob"
-        }
-      ],
-      "nullable": [
-        true
-      ],
+      "columns": [],
+      "nullable": [],
       "parameters": {
-        "Right": 1
+        "Right": 5
       }
     },
-    "query": "SELECT data FROM omb_events WHERE dev = ?1 AND message_type = 'gps' ORDER BY received DESC LIMIT 1"
+    "query": "INSERT INTO omb_events (dev, received, account, message_type, data) VALUES ( $1, $2, $3, $4, $5 )"
   },
-  "b52ae20f315da372802921a07c87ba2242ed36511daa7d6cfde192a08ae0b674": {
+  "c25e9fa2de9771aeb4acb1cf034b6ef25b439c0807268fa0249dce8e4c8c93a8": {
     "describe": {
       "columns": [
         {
@@ -250,9 +212,39 @@
         "Right": 1
       }
     },
-    "query": "SELECT dev, name, buoy_type FROM buoys where dev = ?1"
+    "query": "SELECT dev, name, buoy_type FROM buoys where dev = $1"
   },
-  "bca93f305115fc0c9f1fba54b2a187af792f1bb3ec67e93f8f69d29538b70f78": {
+  "cf42cd406a9341c6c74119320161040caba48e64fb92148a6f8d359d693477e1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "event",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "received",
+          "ordinal": 1,
+          "type_info": "Int64"
+        },
+        {
+          "name": "message_type",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 3
+      }
+    },
+    "query": "SELECT event, received, message_type FROM events WHERE dev = $1 AND received >= $2 AND received <= $3 ORDER BY received"
+  },
+  "d58382cd82a8f1b20ab6ab0f828fa88e65496190d76126823446c486283a35f0": {
     "describe": {
       "columns": [
         {
@@ -265,40 +257,38 @@
         true
       ],
       "parameters": {
-        "Right": 1
-      }
-    },
-    "query": "SELECT data FROM events WHERE dev = ?1 AND (message_type = 'axl.qo' or message_type = '_track.qo') ORDER BY received DESC LIMIT 1"
-  },
-  "d38a5ff42574316a2dee2765d4151866f3deb4e22cee4d630f16864c4aa028fc": {
-    "describe": {
-      "columns": [
-        {
-          "name": "event",
-          "ordinal": 0,
-          "type_info": "Int64"
-        },
-        {
-          "name": "message_type",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "received",
-          "ordinal": 2,
-          "type_info": "Int64"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
-      "parameters": {
         "Right": 3
       }
     },
-    "query": "SELECT event, message_type, received FROM omb_events WHERE dev = ?1 AND received >= ?2 AND received <= ?3 ORDER BY received"
+    "query": "SELECT data FROM events WHERE dev = $1 AND received = $2 AND event = $3"
+  },
+  "d8e45d855c348b842a52a35dc687f0ef2612ce840931408d32880522974e9e87": {
+    "describe": {
+      "columns": [
+        {
+          "name": "data",
+          "ordinal": 0,
+          "type_info": "Blob"
+        }
+      ],
+      "nullable": [
+        true
+      ],
+      "parameters": {
+        "Right": 4
+      }
+    },
+    "query": "SELECT data FROM omb_events WHERE dev = $1 AND received = $2 AND event = $3 AND message_type = $4"
+  },
+  "d99341d262402abfd8e8e8832e635ef453253fa22894924e873cc192a422629a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 2
+      }
+    },
+    "query": "UPDATE buoys SET name = $1 where dev = $2"
   },
   "dba868da1bf3f30789c992fd990596983001647a1cc01178767b60dbcee05648": {
     "describe": {
@@ -330,7 +320,37 @@
     },
     "query": "SELECT dev, name, buoy_type FROM buoys ORDER BY dev"
   },
-  "e9f07ce71c50e05dc3c5bec78f8cad93caed05982fa67ceac5e703f9bf4a3738": {
+  "e91e0be4aeb11e7f95182b840335e31f07995980f70fdc7a1e325b145cf8c1fa": {
+    "describe": {
+      "columns": [
+        {
+          "name": "event",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "message_type",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "received",
+          "ordinal": 2,
+          "type_info": "Int64"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 3
+      }
+    },
+    "query": "SELECT event, message_type, received FROM omb_events WHERE dev = $1 AND received >= $2 AND received <= $3 ORDER BY received"
+  },
+  "f960fff5030e7b0454b1f15657c82badb6b3b06853101557cad9555ac67ff991": {
     "describe": {
       "columns": [
         {
@@ -343,19 +363,9 @@
         true
       ],
       "parameters": {
-        "Right": 3
+        "Right": 1
       }
     },
-    "query": "SELECT data FROM events WHERE dev = ?1 AND received = ?2 AND event = ?3"
-  },
-  "ec7c0be54871b5c5d3f71c5b97a90ca1646db80f243c44cb0e03856e53be5eab": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Right": 5
-      }
-    },
-    "query": "INSERT INTO omb_events (dev, received, account, message_type, data) VALUES ( ?1, ?2, ?3, ?4, ?5 )"
+    "query": "SELECT data FROM omb_events WHERE dev = $1 AND message_type = 'gps' ORDER BY received DESC LIMIT 1"
   }
 }

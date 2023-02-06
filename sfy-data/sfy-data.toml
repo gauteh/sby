@@ -1,5 +1,6 @@
 address = "0.0.0.0:3000"
-database = "sqlite://sfy-data.db"
+# database = "sqlite://sfy-data.db"
+database = "postgres://postgres:sfytest@localhost/postgres"
 tokens = [
   "thicaige6oagh3izohvie5Piech9cu5eiweuk5eumoh4aeshooXaghefeme2aizohnohtoowaequ1Ieghuoc8aboj8owuiPai8johthaif8chie1tahgh9in"
 ]
