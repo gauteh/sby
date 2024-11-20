@@ -272,4 +272,29 @@ mod tests {
         // This does not include the additional size used by COBS.
         // assert!(AXL_POSTCARD_SZ >= AxlPacket::POSTCARD_MAX_SIZE);
     }
+
+    #[test]
+    fn temp_not_f32_subnormal() {
+        // the notecard does not handle NaN f32's
+        let p = AxlPacketMeta::default();
+
+        let v: heapless::String<{10 * 1024}> = serde_json_core::to_string(&p).unwrap();
+        dbg!(&v);
+        assert!(v.contains("temperature"));
+
+
+        let mut p = AxlPacketMeta::default();
+        p.temperature = f32::NAN;
+
+        let v: heapless::String<{10 * 1024}> = serde_json_core::to_string(&p).unwrap();
+        dbg!(&v);
+        assert!(!v.contains("temperature"));
+
+        let mut p = AxlPacketMeta::default();
+        p.temperature = f32::INFINITY;
+
+        let v: heapless::String<{10 * 1024}> = serde_json_core::to_string(&p).unwrap();
+        dbg!(&v);
+        assert!(!v.contains("temperature"));
+    }
 }
