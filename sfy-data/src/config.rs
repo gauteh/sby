@@ -7,7 +7,7 @@ use std::path::PathBuf;
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
     pub address: SocketAddr,
-    pub database: Option<PathBuf>,
+    pub database: Option<String>,
     pub tokens: Vec<String>,
     pub read_tokens: Vec<String>,
     pub files: Option<PathBuf>,

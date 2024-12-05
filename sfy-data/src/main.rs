@@ -45,7 +45,7 @@ async fn main() -> eyre::Result<()> {
     let config = config::Config::from_path(sfy.config);
 
     let database = config.database.clone().expect("no database path specified");
-    let database = database::Database::open(database).await?;
+    let database = database::Database::open(&database).await?;
 
     let state = Arc::new(SfyState {
         db: database,
