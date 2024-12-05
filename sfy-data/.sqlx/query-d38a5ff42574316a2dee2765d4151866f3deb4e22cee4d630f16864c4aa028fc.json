@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT event, message_type, received FROM omb_events WHERE dev = ?1 AND received >= ?2 AND received <= ?3 ORDER BY received",
+  "describe": {
+    "columns": [
+      {
+        "name": "event",
+        "ordinal": 0,
+        "type_info": "Int64"
+      },
+      {
+        "name": "message_type",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "received",
+        "ordinal": 2,
+        "type_info": "Int64"
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d38a5ff42574316a2dee2765d4151866f3deb4e22cee4d630f16864c4aa028fc"
+}

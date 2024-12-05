@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO omb_events (dev, received, account, message_type, data) VALUES ( ?1, ?2, ?3, ?4, ?5 )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "ec7c0be54871b5c5d3f71c5b97a90ca1646db80f243c44cb0e03856e53be5eab"
+}

@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT data FROM events WHERE dev = ?1 AND (message_type = 'axl.qo' or message_type = '_track.qo') ORDER BY received DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "data",
+        "ordinal": 0,
+        "type_info": "Blob"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "bca93f305115fc0c9f1fba54b2a187af792f1bb3ec67e93f8f69d29538b70f78"
+}

@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT data FROM omb_events WHERE dev = ?1 AND message_type = 'gps' ORDER BY received DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "data",
+        "ordinal": 0,
+        "type_info": "Blob"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "a5795363da9c8a2d95aaf58735c7ff40b321cc47c50655136b48020c349b3019"
+}

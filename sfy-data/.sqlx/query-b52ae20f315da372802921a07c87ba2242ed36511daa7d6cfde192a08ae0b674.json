@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT dev, name, buoy_type FROM buoys where dev = ?1",
+  "describe": {
+    "columns": [
+      {
+        "name": "dev",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "buoy_type",
+        "ordinal": 2,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "b52ae20f315da372802921a07c87ba2242ed36511daa7d6cfde192a08ae0b674"
+}

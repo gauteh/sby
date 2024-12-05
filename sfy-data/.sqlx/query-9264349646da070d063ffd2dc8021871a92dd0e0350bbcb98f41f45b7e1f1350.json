@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT event, received, data FROM events WHERE dev = ?1 AND received >= ?2 AND received <= ?3 ORDER BY received",
+  "describe": {
+    "columns": [
+      {
+        "name": "event",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "received",
+        "ordinal": 1,
+        "type_info": "Int64"
+      },
+      {
+        "name": "data",
+        "ordinal": 2,
+        "type_info": "Blob"
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "9264349646da070d063ffd2dc8021871a92dd0e0350bbcb98f41f45b7e1f1350"
+}

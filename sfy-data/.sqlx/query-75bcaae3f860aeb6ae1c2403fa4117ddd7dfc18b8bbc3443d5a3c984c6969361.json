@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT OR REPLACE INTO buoys (dev, buoy_type) VALUES ( ?1, 'omb' )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "75bcaae3f860aeb6ae1c2403fa4117ddd7dfc18b8bbc3443d5a3c984c6969361"
+}

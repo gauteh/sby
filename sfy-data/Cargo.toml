@@ -6,22 +6,22 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-argh = "0.1.6"
-color-eyre = "0.5.11"
-csv = "1.1.6"
-env_logger = "0.9.0"
-eyre = "0.6.5"
+argh = "0.1"
+color-eyre = "0.6"
+csv = "1"
+env_logger = "0.11"
+eyre = "0.6"
 log = "0.4.14"
-rustbreak = "2.0.0"
+rustbreak = "2"
 serde = { version = "1", features = [ "derive" ] }
-tokio = { version = "1.12.0", features = [ "full" ] }
-toml = "0.5.8"
-warp = "0.3.1"
-bytes = "1.1.0"
-futures-util = "0.3.18"
-serde_json = "1.0.72"
-sanitize-filename = "0.3.0"
-sqlx = { version = "0.5.11", features = [ "runtime-tokio-native-tls", "sqlite", "macros", "migrate", "offline", "chrono" ] }
-percent-encoding = "2.1.0"
-base64 = "0.13.0"
+tokio = { version = "1.36", features = [ "full" ] }
+toml = "0.8"
+warp = "0.3"
+bytes = "1.5"
+futures-util = "0.3"
+serde_json = "1"
+sanitize-filename = "0.5"
+sqlx = { version = "0.7", features = [ "runtime-tokio-native-tls", "sqlite", "macros", "migrate", "chrono" ] }
+percent-encoding = "2.3"
+base64 = "0.21"
 

@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT received, event, message_type FROM events where dev = ?1 ORDER BY received",
+  "describe": {
+    "columns": [
+      {
+        "name": "received",
+        "ordinal": 0,
+        "type_info": "Int64"
+      },
+      {
+        "name": "event",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "message_type",
+        "ordinal": 2,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "630299a0d4be768c469d4fa54940c348656a04b7f90f23abc503e7bb3e6377f0"
+}

@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT data FROM events WHERE dev = ?1 AND received = ?2 AND event = ?3",
+  "describe": {
+    "columns": [
+      {
+        "name": "data",
+        "ordinal": 0,
+        "type_info": "Blob"
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "e9f07ce71c50e05dc3c5bec78f8cad93caed05982fa67ceac5e703f9bf4a3738"
+}

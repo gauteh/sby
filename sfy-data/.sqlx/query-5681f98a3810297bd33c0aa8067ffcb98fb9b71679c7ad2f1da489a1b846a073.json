@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT data FROM omb_events WHERE dev = ?1 AND received = ?2 AND event = ?3 AND message_type = ?4",
+  "describe": {
+    "columns": [
+      {
+        "name": "data",
+        "ordinal": 0,
+        "type_info": "Blob"
+      }
+    ],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "5681f98a3810297bd33c0aa8067ffcb98fb9b71679c7ad2f1da489a1b846a073"
+}
